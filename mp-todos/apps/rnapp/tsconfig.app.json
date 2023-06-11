@@ -10,5 +10,5 @@
     "src/**/*.spec.tsx",
     "test-setup.ts"
   ],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx"]
+  "include": ["libs/data-access/src/**/*.ts","src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx"]
 }
