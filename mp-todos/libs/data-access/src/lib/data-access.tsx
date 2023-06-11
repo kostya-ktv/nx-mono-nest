@@ -1,18 +1,48 @@
-import styled from 'styled-components';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Todo } from '@mp-todos/shared-types';
+import axios from 'axios';
 
-/* eslint-disable-next-line */
-export interface DataAccessProps {}
+export function useTodos() {
+  const [todos, setTodos] = useState<Todo[]>([]);
 
-const StyledDataAccess = styled.div`
-  color: pink;
-`;
+  const api = axios.create({ baseURL: 'http://localhost:3333/api' });
 
-export function DataAccess(props: DataAccessProps) {
-  return (
-    <StyledDataAccess>
-      <h1>Welcome to DataAccess!</h1>
-    </StyledDataAccess>
+  const getTodos = useCallback(async () => {
+    await api.get<Todo[]>('').then((res) => setTodos(res.data));
+  }, []);
+
+  const addTodo = useCallback(async (text: string) => {
+    await api
+      .post('', {
+        text,
+      })
+      .then(async () => {
+        await getTodos();
+      });
+  }, []);
+
+  const onToggle = useCallback(
+    async (id: number) => {
+      const done = todos.find((todo) => todo.id === id)?.done;
+      console.log(done);
+      await api
+        .post('setDone', {
+          id,
+          done: !done,
+        })
+        .then(async () => await getTodos());
+    },
+    [todos]
   );
-}
 
-export default DataAccess;
+  useEffect(() => {
+    void getTodos();
+  }, []);
+
+  return {
+    todos,
+    getTodos,
+    addTodo,
+    onToggle,
+  };
+}

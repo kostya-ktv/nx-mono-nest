@@ -1,43 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Todo } from '@mp-todos/shared-types';
-import axios from 'axios';
+import { useCallback, useEffect, useRef } from 'react';
+import { useTodos } from '@mp-todos/data-access';
 
 export function App() {
-  const [todos, setTodos] = useState<Todo[]>([]);
+  const { addTodo, getTodos, onToggle, todos } = useTodos();
 
-  const api = axios.create({ baseURL: 'http://localhost:3333/api' });
   const textInputRef = useRef<HTMLInputElement>(null);
 
-  const getTodos = useCallback(async () => {
-    await api.get<Todo[]>('').then((res) => setTodos(res.data));
-  }, []);
-
-  const addTodo = useCallback(async () => {
+  const onAddTodo = useCallback(async () => {
     if (textInputRef.current) {
-      await api
-        .post('', {
-          text: textInputRef.current!.value,
-        })
-        .then(async () => {
-          textInputRef.current!.value = '';
-          await getTodos();
-        });
+      await addTodo(textInputRef.current!.value);
     }
   }, [textInputRef]);
-
-  const onToggle = useCallback(
-    async (id: number) => {
-      const done = todos.find((todo) => todo.id === id)?.done;
-      console.log(done);
-      await api
-        .post('setDone', {
-          id,
-          done: !done,
-        })
-        .then(async () => await getTodos());
-    },
-    [todos]
-  );
 
   useEffect(() => {
     void getTodos();
@@ -61,7 +34,7 @@ export function App() {
         <input ref={textInputRef} />
       </div>
 
-      <button onClick={addTodo}>Add todo</button>
+      <button onClick={onAddTodo}>Add todo</button>
     </div>
   );
 }
